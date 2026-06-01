@@ -1,0 +1,47 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/checkout/",
+  "preferredVersions": {
+    "php": "8.3",
+    "wp": "latest"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installPlugin",
+      "progress": { "caption": "Installing WooCommerce..." },
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "woocommerce"
+      }
+    },
+    {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/mu-plugins/wc-repro-hidden-bug.php",
+      "data": "<?php\n/**\n * Plugin Name: WC Checkout Hidden Field Bug Repro (mu-plugin)\n * Description: Minimal reproduction of hidden condition not working for location:address. Issue #65416.\n */\nif ( ! defined( 'ABSPATH' ) ) { exit; }\n\nadd_action( 'woocommerce_init', function () {\n    if ( ! function_exists( 'woocommerce_register_additional_checkout_field' ) ) { return; }\n\n    // Field 1: select — appears correctly\n    woocommerce_register_additional_checkout_field( array(\n        'id'       => 'repro/customer-type',\n        'label'    => 'Customer type (repro)',\n        'location' => 'address',\n        'type'     => 'select',\n        'required' => true,\n        'options'  => array(\n            array( 'value' => '',         'label' => '\\u2014 Select \\u2014' ),\n            array( 'value' => 'private',  'label' => 'Private' ),\n            array( 'value' => 'business', 'label' => 'Business' ),\n        ),\n    ) );\n\n    // Field 2: text — BUG: never appears even when customer-type = 'business'\n    woocommerce_register_additional_checkout_field( array(\n        'id'       => 'repro/vat-number',\n        'label'    => 'VAT Number (should appear only for Business)',\n        'location' => 'address',\n        'type'     => 'text',\n        'required' => array(\n            'checkout' => array(\n                'properties' => array(\n                    'additional_fields' => array(\n                        'properties' => array(\n                            'repro/customer-type' => array( 'const' => 'business' ),\n                        ),\n                    ),\n                ),\n            ),\n        ),\n        'hidden' => array(\n            'checkout' => array(\n                'properties' => array(\n                    'additional_fields' => array(\n                        'properties' => array(\n                            'repro/customer-type' => array(\n                                'not' => array( 'const' => 'business' ),\n                            ),\n                        ),\n                    ),\n                ),\n            ),\n        ),\n    ) );\n} );\n"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; update_option('woocommerce_store_address', '123 Test Street'); update_option('woocommerce_default_country', 'IT'); update_option('woocommerce_currency', 'EUR'); update_option('woocommerce_coming_soon', 'no'); update_option('woocommerce_onboarding_profile', ['skipped' => true]); echo 'WooCommerce options set';"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; $product = new WC_Simple_Product(); $product->set_name('Test Product'); $product->set_regular_price('10'); $product->set_status('publish'); $product->save(); echo 'Product created: ' . $product->get_id();"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; $page_id = wc_get_page_id('checkout'); if ($page_id > 0) { $page = get_post($page_id); update_post_meta($page_id, '_wp_page_template', 'default'); } $checkout_content = '<!-- wp:woocommerce/checkout --><div class=\"wp-block-woocommerce-checkout wc-block-checkout is-loading\"></div><!-- /wp:woocommerce/checkout -->'; wp_update_post(['ID' => $page_id, 'post_content' => $checkout_content]); echo 'Checkout page updated with block';"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; WC()->cart->add_to_cart(get_posts(['post_type'=>'product','numberposts'=>1])[0]->ID); echo 'Product added to cart';"
+    }
+  ]
+}

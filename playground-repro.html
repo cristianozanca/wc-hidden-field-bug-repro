@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WooCommerce Hidden Field Bug Repro — WordPress Playground</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #1e1e1e; }
+  h1 { font-size: 1.4em; }
+  .tag { background: #d63638; color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 3px; vertical-align: middle; }
+  .btn { display: inline-block; background: #3858e9; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 1em; margin: 16px 0; }
+  .btn:hover { background: #2145e6; }
+  ol li { margin-bottom: 8px; }
+  code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  .note { background: #fff8e5; border-left: 4px solid #dba617; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 16px 0; font-size: 0.9em; }
+  .url-box { background: #f6f7f7; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-size: 0.75em; word-break: break-all; color: #555; margin-top: 24px; }
+</style>
+</head>
+<body>
+<h1>WooCommerce Hidden Field Bug Repro <span class="tag">Issue #65416</span></h1>
+
+<p>
+  This Playground demonstrates the bug: a field registered with <code>location:'address'</code>
+  and a <code>hidden</code> condition based on another <code>additional_field</code> value
+  <strong>never becomes visible</strong>, regardless of the select value.
+</p>
+
+<a class="btn" href="https://playground.wordpress.net/#ewogICIkc2NoZW1hIjogImh0dHBzOi8vcGxheWdyb3VuZC53b3JkcHJlc3MubmV0L2JsdWVwcmludC1zY2hlbWEuanNvbiIsCiAgImxhbmRpbmdQYWdlIjogIi9jaGVja291dC8iLAogICJwcmVmZXJyZWRWZXJzaW9ucyI6IHsKICAgICJwaHAiOiAiOC4zIiwKICAgICJ3cCI6ICJsYXRlc3QiCiAgfSwKICAiZmVhdHVyZXMiOiB7CiAgICAibmV0d29ya2luZyI6IHRydWUKICB9LAogICJzdGVwcyI6IFsKICAgIHsKICAgICAgInN0ZXAiOiAibG9naW4iLAogICAgICAidXNlcm5hbWUiOiAiYWRtaW4iLAogICAgICAicGFzc3dvcmQiOiAicGFzc3dvcmQiCiAgICB9LAogICAgewogICAgICAic3RlcCI6ICJpbnN0YWxsUGx1Z2luIiwKICAgICAgInByb2dyZXNzIjogeyAiY2FwdGlvbiI6ICJJbnN0YWxsaW5nIFdvb0NvbW1lcmNlLi4uIiB9LAogICAgICAicGx1Z2luRGF0YSI6IHsKICAgICAgICAicmVzb3VyY2UiOiAid29yZHByZXNzLm9yZy9wbHVnaW5zIiwKICAgICAgICAic2x1ZyI6ICJ3b29jb21tZXJjZSIKICAgICAgfQogICAgfSwKICAgIHsKICAgICAgInN0ZXAiOiAid3JpdGVGaWxlIiwKICAgICAgInBhdGgiOiAiL3dvcmRwcmVzcy93cC1jb250ZW50L211LXBsdWdpbnMvd2MtcmVwcm8taGlkZGVuLWJ1Zy5waHAiLAogICAgICAiZGF0YSI6ICI8P3BocFxuLyoqXG4gKiBQbHVnaW4gTmFtZTogV0MgQ2hlY2tvdXQgSGlkZGVuIEZpZWxkIEJ1ZyBSZXBybyAobXUtcGx1Z2luKVxuICogRGVzY3JpcHRpb246IE1pbmltYWwgcmVwcm9kdWN0aW9uIG9mIGhpZGRlbiBjb25kaXRpb24gbm90IHdvcmtpbmcgZm9yIGxvY2F0aW9uOmFkZHJlc3MuIElzc3VlICM2NTQxNi5cbiAqL1xuaWYgKCAhIGRlZmluZWQoICdBQlNQQVRIJyApICkgeyBleGl0OyB9XG5cbmFkZF9hY3Rpb24oICd3b29jb21tZXJjZV9pbml0JywgZnVuY3Rpb24gKCkge1xuICAgIGlmICggISBmdW5jdGlvbl9leGlzdHMoICd3b29jb21tZXJjZV9yZWdpc3Rlcl9hZGRpdGlvbmFsX2NoZWNrb3V0X2ZpZWxkJyApICkgeyByZXR1cm47IH1cblxuICAgIC8vIEZpZWxkIDE6IHNlbGVjdCDigJQgYXBwZWFycyBjb3JyZWN0bHlcbiAgICB3b29jb21tZXJjZV9yZWdpc3Rlcl9hZGRpdGlvbmFsX2NoZWNrb3V0X2ZpZWxkKCBhcnJheShcbiAgICAgICAgJ2lkJyAgICAgICA9PiAncmVwcm8vY3VzdG9tZXItdHlwZScsXG4gICAgICAgICdsYWJlbCcgICAgPT4gJ0N1c3RvbWVyIHR5cGUgKHJlcHJvKScsXG4gICAgICAgICdsb2NhdGlvbicgPT4gJ2FkZHJlc3MnLFxuICAgICAgICAndHlwZScgICAgID0+ICdzZWxlY3QnLFxuICAgICAgICAncmVxdWlyZWQnID0+IHRydWUsXG4gICAgICAgICdvcHRpb25zJyAgPT4gYXJyYXkoXG4gICAgICAgICAgICBhcnJheSggJ3ZhbHVlJyA9PiAnJywgICAgICAgICAnbGFiZWwnID0+ICdcXHUyMDE0IFNlbGVjdCBcXHUyMDE0JyApLFxuICAgICAgICAgICAgYXJyYXkoICd2YWx1ZScgPT4gJ3ByaXZhdGUnLCAgJ2xhYmVsJyA9PiAnUHJpdmF0ZScgKSxcbiAgICAgICAgICAgIGFycmF5KCAndmFsdWUnID0+ICdidXNpbmVzcycsICdsYWJlbCcgPT4gJ0J1c2luZXNzJyApLFxuICAgICAgICApLFxuICAgICkgKTtcblxuICAgIC8vIEZpZWxkIDI6IHRleHQg4oCUIEJVRzogbmV2ZXIgYXBwZWFycyBldmVuIHdoZW4gY3VzdG9tZXItdHlwZSA9ICdidXNpbmVzcydcbiAgICB3b29jb21tZXJjZV9yZWdpc3Rlcl9hZGRpdGlvbmFsX2NoZWNrb3V0X2ZpZWxkKCBhcnJheShcbiAgICAgICAgJ2lkJyAgICAgICA9PiAncmVwcm8vdmF0LW51bWJlcicsXG4gICAgICAgICdsYWJlbCcgICAgPT4gJ1ZBVCBOdW1iZXIgKHNob3VsZCBhcHBlYXIgb25seSBmb3IgQnVzaW5lc3MpJyxcbiAgICAgICAgJ2xvY2F0aW9uJyA9PiAnYWRkcmVzcycsXG4gICAgICAgICd0eXBlJyAgICAgPT4gJ3RleHQnLFxuICAgICAgICAncmVxdWlyZWQnID0+IGFycmF5KFxuICAgICAgICAgICAgJ2NoZWNrb3V0JyA9PiBhcnJheShcbiAgICAgICAgICAgICAgICAncHJvcGVydGllcycgPT4gYXJyYXkoXG4gICAgICAgICAgICAgICAgICAgICdhZGRpdGlvbmFsX2ZpZWxkcycgPT4gYXJyYXkoXG4gICAgICAgICAgICAgICAgICAgICAgICAncHJvcGVydGllcycgPT4gYXJyYXkoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgJ3JlcHJvL2N1c3RvbWVyLXR5cGUnID0+IGFycmF5KCAnY29uc3QnID0+ICdidXNpbmVzcycgKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICksXG4gICAgICAgICAgICAgICAgICAgICksXG4gICAgICAgICAgICAgICAgKSxcbiAgICAgICAgICAgICksXG4gICAgICAgICksXG4gICAgICAgICdoaWRkZW4nID0+IGFycmF5KFxuICAgICAgICAgICAgJ2NoZWNrb3V0JyA9PiBhcnJheShcbiAgICAgICAgICAgICAgICAncHJvcGVydGllcycgPT4gYXJyYXkoXG4gICAgICAgICAgICAgICAgICAgICdhZGRpdGlvbmFsX2ZpZWxkcycgPT4gYXJyYXkoXG4gICAgICAgICAgICAgICAgICAgICAgICAncHJvcGVydGllcycgPT4gYXJyYXkoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgJ3JlcHJvL2N1c3RvbWVyLXR5cGUnID0+IGFycmF5KFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnbm90JyA9PiBhcnJheSggJ2NvbnN0JyA9PiAnYnVzaW5lc3MnICksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgKSxcbiAgICAgICAgICAgICAgICAgICAgICAgICksXG4gICAgICAgICAgICAgICAgICAgICksXG4gICAgICAgICAgICAgICAgKSxcbiAgICAgICAgICAgICksXG4gICAgICAgICksXG4gICAgKSApO1xufSApO1xuIgogICAgfSwKICAgIHsKICAgICAgInN0ZXAiOiAicnVuUEhQIiwKICAgICAgImNvZGUiOiAiPD9waHAgcmVxdWlyZSAnL3dvcmRwcmVzcy93cC1sb2FkLnBocCc7IHVwZGF0ZV9vcHRpb24oJ3dvb2NvbW1lcmNlX3N0b3JlX2FkZHJlc3MnLCAnMTIzIFRlc3QgU3RyZWV0Jyk7IHVwZGF0ZV9vcHRpb24oJ3dvb2NvbW1lcmNlX2RlZmF1bHRfY291bnRyeScsICdJVCcpOyB1cGRhdGVfb3B0aW9uKCd3b29jb21tZXJjZV9jdXJyZW5jeScsICdFVVInKTsgdXBkYXRlX29wdGlvbignd29vY29tbWVyY2VfY29taW5nX3Nvb24nLCAnbm8nKTsgdXBkYXRlX29wdGlvbignd29vY29tbWVyY2Vfb25ib2FyZGluZ19wcm9maWxlJywgWydza2lwcGVkJyA9PiB0cnVlXSk7IGVjaG8gJ1dvb0NvbW1lcmNlIG9wdGlvbnMgc2V0JzsiCiAgICB9LAogICAgewogICAgICAic3RlcCI6ICJydW5QSFAiLAogICAgICAiY29kZSI6ICI8P3BocCByZXF1aXJlICcvd29yZHByZXNzL3dwLWxvYWQucGhwJzsgJHByb2R1Y3QgPSBuZXcgV0NfU2ltcGxlX1Byb2R1Y3QoKTsgJHByb2R1Y3QtPnNldF9uYW1lKCdUZXN0IFByb2R1Y3QnKTsgJHByb2R1Y3QtPnNldF9yZWd1bGFyX3ByaWNlKCcxMCcpOyAkcHJvZHVjdC0+c2V0X3N0YXR1cygncHVibGlzaCcpOyAkcHJvZHVjdC0+c2F2ZSgpOyBlY2hvICdQcm9kdWN0IGNyZWF0ZWQ6ICcgLiAkcHJvZHVjdC0+Z2V0X2lkKCk7IgogICAgfSwKICAgIHsKICAgICAgInN0ZXAiOiAicnVuUEhQIiwKICAgICAgImNvZGUiOiAiPD9waHAgcmVxdWlyZSAnL3dvcmRwcmVzcy93cC1sb2FkLnBocCc7ICRwYWdlX2lkID0gd2NfZ2V0X3BhZ2VfaWQoJ2NoZWNrb3V0Jyk7IGlmICgkcGFnZV9pZCA+IDApIHsgJHBhZ2UgPSBnZXRfcG9zdCgkcGFnZV9pZCk7IHVwZGF0ZV9wb3N0X21ldGEoJHBhZ2VfaWQsICdfd3BfcGFnZV90ZW1wbGF0ZScsICdkZWZhdWx0Jyk7IH0gJGNoZWNrb3V0X2NvbnRlbnQgPSAnPCEtLSB3cDp3b29jb21tZXJjZS9jaGVja291dCAtLT48ZGl2IGNsYXNzPVwid3AtYmxvY2std29vY29tbWVyY2UtY2hlY2tvdXQgd2MtYmxvY2stY2hlY2tvdXQgaXMtbG9hZGluZ1wiPjwvZGl2PjwhLS0gL3dwOndvb2NvbW1lcmNlL2NoZWNrb3V0IC0tPic7IHdwX3VwZGF0ZV9wb3N0KFsnSUQnID0+ICRwYWdlX2lkLCAncG9zdF9jb250ZW50JyA9PiAkY2hlY2tvdXRfY29udGVudF0pOyBlY2hvICdDaGVja291dCBwYWdlIHVwZGF0ZWQgd2l0aCBibG9jayc7IgogICAgfSwKICAgIHsKICAgICAgInN0ZXAiOiAicnVuUEhQIiwKICAgICAgImNvZGUiOiAiPD9waHAgcmVxdWlyZSAnL3dvcmRwcmVzcy93cC1sb2FkLnBocCc7IFdDKCktPmNhcnQtPmFkZF90b19jYXJ0KGdldF9wb3N0cyhbJ3Bvc3RfdHlwZSc9Pidwcm9kdWN0JywnbnVtYmVycG9zdHMnPT4xXSlbMF0tPklEKTsgZWNobyAnUHJvZHVjdCBhZGRlZCB0byBjYXJ0JzsiCiAgICB9CiAgXQp9Cg==" target="_blank">▶ Open in WordPress Playground</a>
+
+<h2>Steps to reproduce</h2>
+<ol>
+  <li>Click the button above — WordPress + WooCommerce will boot automatically (takes ~30s)</li>
+  <li>You will land on the <strong>Checkout page</strong></li>
+  <li>Fill in a name and address in the billing section</li>
+  <li>Look for the select labeled <strong>"Customer type (repro)"</strong></li>
+  <li>Select <strong>"Business"</strong></li>
+  <li>Observe: the field <strong>"VAT Number (should appear only for Business)"</strong> never appears</li>
+</ol>
+
+<div class="note">
+  <strong>Expected:</strong> selecting "Business" should show the VAT Number field via the native <code>hidden</code> JSON Schema condition.<br>
+  <strong>Actual:</strong> the field is never rendered, regardless of the select value.
+</div>
+
+<h2>What this repro contains</h2>
+<ul>
+  <li>WordPress (latest) + WooCommerce (latest from wordpress.org)</li>
+  <li>A minimal mu-plugin with <strong>zero custom CSS or JS</strong> — only <code>woocommerce_register_additional_checkout_field()</code></li>
+  <li>A sample product already in the cart so the checkout is accessible</li>
+  <li>Checkout page configured with the native WooCommerce Checkout Block</li>
+</ul>
+
+<div class="url-box">
+  <strong>Direct Playground URL (blueprint encoded inline):</strong><br>
+  https://playground.wordpress.net/#ewogICIkc2NoZW1hIjogImh0dHBzOi8vcGxheWdyb3VuZC53b3JkcHJlc3MubmV0L2JsdWVwcmludC1zY2hlbWEuanNvbiIsCiAgImxhbmRpbmdQYWdlIjogIi9jaGVja291dC8iLAogICJwcmVmZXJyZWRWZXJzaW9ucy...
+</div>
+
+</body>
+</html>
